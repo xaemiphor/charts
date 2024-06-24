@@ -1,0 +1,34 @@
+{{- range $k, $cfg := .Values.apps }}
+{{- if $cfg.enabled }}
+{{- $appNamespace := "argocd" -}}
+{{- $destNamespace := (default $.Values.app_defaults.destination.namespace $cfg.namespace) -}}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ default $.Chart.Name $.Values.name }}-{{ default $k $cfg.name }}
+  #namespace: {{ default $.Values.namespace $cfg.namespace }}
+  namespace: {{ $appNamespace }}
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  annotations:
+    argocd.argoproj.io/manifest-generate-paths: .
+spec:
+  project: {{ $.Values.project.name }}
+  source:
+    repoURL: {{ default "https://github.com/xaemiphor/charts" (default $.Values.app_defaults.repoURL $cfg.repoURL) }}
+    targetRevision: {{ default "dev" (default $.Values.app_defaults.targetRevision $cfg.targetRevision) }}
+    path: {{ default $k $cfg.path }}
+  destination:
+    #name: {{ default $.Values.cluster $cfg.cluster }}
+    server: {{ $.Values.app_defaults.destination.server }}
+    namespace: {{ $destNamespace }}
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: true
+    syncOptions:
+      - CreateNamespace=true
+      - RespectIgnoreDifferences=true
+{{ end }}
+{{- end }}

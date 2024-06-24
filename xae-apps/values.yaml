@@ -1,0 +1,17 @@
+name: "xae-apps"
+namespace: xae-apps
+project:
+  create: true # Set to false if reusing existing one, update project.name to match
+  name: xae-apps
+  namespace: argocd # Default required by argo, unless environment has been changed
+app_defaults:
+  source:
+    repoURL: 'https://github.com/xaemiphor/charts'
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: xae-apps
+apps:
+  cadvisor:
+    enabled: true
+  whoami:
+    enabled: true
